@@ -1,0 +1,8 @@
+Level,Date and Time,Source,Event ID,Task Category,
+Information,6/29/2018 13:45,Microsoft-Windows-Servicing,2,-1,Package KB4284874 was successfully changed to the Installed state.
+Information,6/29/2018 13:30,Microsoft-Windows-Servicing,4,-1,A reboot is necessary before package KB4284874 can be changed to the Installed state.
+Information,6/29/2018 11:18,Microsoft-Windows-Servicing,2,-1,Package KB4287903 was successfully changed to the Installed state.
+Information,6/29/2018 11:17,Microsoft-Windows-Servicing,1,-1,Initiating changes for package KB4287903. Current state is Absent. Target state is Installed. Client id: WindowsUpdateAgent.
+Information,6/29/2018 10:08,Microsoft-Windows-Servicing,1,-1,Initiating changes for package KB4284874. Current state is Absent. Target state is Installed. Client id: WindowsUpdateAgent.
+,,,,,
+test,,,,,
