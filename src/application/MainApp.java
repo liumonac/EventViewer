@@ -144,6 +144,7 @@ public class MainApp extends Application {
     	for (int i = 0; i < logFiles.size(); i++) {
     		if (logFiles.get(i).getFileName().equals(fileName) ) {
     			idx = i;
+    			break;
     		}
     	}
     	
@@ -153,10 +154,11 @@ public class MainApp extends Application {
     //load events from file
     public void loadEventsFile(File file) {
     	int idx = getLogIdx(file.getName());
+
     	//if file is already open
 	    if (idx != -1 ) {
 		    Alert alert = new Alert(AlertType.INFORMATION);
-		    alert.setTitle("Error");
+		    alert.setTitle("File Loading");
 		    alert.setHeaderText("File with same name already loaded:\n" + file.getName());
 		    alert.show();
 		//else open file
@@ -196,6 +198,8 @@ public class MainApp extends Application {
             			combined = str[5];
 	            		logEvents.add (iter);
 	            	}
+	            	
+	            	//System.out.println(combined);  //debugging
 
 	            	line = reader.readLine();
 	            }
@@ -212,7 +216,7 @@ public class MainApp extends Application {
 	            reader.close();
 	
 	        } catch (Exception e) {
-	        	Alert alert = new Alert(AlertType.INFORMATION);
+	        	Alert alert = new Alert(AlertType.ERROR);
 	        	alert.setTitle("Error");
 	        	alert.setHeaderText("Could not load data from file:\n" + file.getPath());
 	        	alert.show();
@@ -222,22 +226,15 @@ public class MainApp extends Application {
     }
     
     public void handleRemove(LogFile log) {
-    	int idx = getLogIdx(log.getFileName());
+    	//remove log file
+    	logFiles.remove(log);
 
-    	if (idx != -1) {
-        	//remove from end of array list
-        	LogFile swap = logFiles.get(logFiles.size() -1);
-        	logFiles.set(logFiles.size() -1, logFiles.get(idx));
-        	logFiles.set(idx, swap);
-        	logFiles.remove(logFiles.size() -1);
-
-        	//remove events associated with the log file, 
-        	//more efficient to re-build than to find and remove one event at a time
-        	//for (event : log.getEvents()) { events.remove(event) }
-        	eventsDisplay.clear();
-        	for (LogFile file : logFiles) {
-        		eventsDisplay.addAll(file.getEvents());
-        	}
+    	//remove events associated with the log file, 
+    	//more efficient to re-build than to find and remove one event at a time
+    	//for (event : log.getEvents()) { events.remove(event) }
+    	eventsDisplay.clear();
+    	for (LogFile file : logFiles) {
+    		eventsDisplay.addAll(file.getEvents());
     	}
     	
     }

@@ -193,12 +193,10 @@ public class EventViewController {
     	//remove button clicked with no selection
     	if (selectedItem == null) {
         	Alert alert = new Alert(AlertType.INFORMATION);
-        	alert.setTitle("Error");
+        	alert.setTitle("Selection Required");
         	alert.setHeaderText("Select a LogFile to remove");
         	alert.show();
     	} else {
-        	int idx = logFileTable.getSelectionModel().getSelectedIndex();
-        	System.out.println (idx);
         	mainApp.handleRemove(selectedItem);
             logFileTable.getItems().remove(selectedItem);
     	}

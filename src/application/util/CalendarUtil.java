@@ -38,7 +38,7 @@ public class CalendarUtil {
     		dateString = date + "0" + time;
     	}
     	
-    	System.out.println(dateString);
+    	//System.out.println(dateString);  //debugging
     	
         Calendar result = Calendar.getInstance();
         try {
