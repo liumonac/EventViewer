@@ -3,26 +3,29 @@ package application;
 import java.io.File;
 
 import application.model.LogEvent;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import application.model.LogFile;
+import application.util.SearchOption;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class EventViewController {
+    private MainApp mainApp;
+    
 	@FXML
     private TextField filterField;
-	
 	@FXML
 	private ComboBox<String> searchOptionBox;
-	
 	
 	@FXML
 	private TableView<LogEvent> eventTable;
@@ -42,18 +45,23 @@ public class EventViewController {
     private TableColumn<LogEvent, String> fileNameCol;  
     
 	@FXML
-	private TableView<String> logFileTable;
-	
+	private TableView<LogFile> logFileTable;
     @FXML
-    private TableColumn<String, String> logFileCol;  
+    private TableColumn<LogFile, String> logFileCol;  
     
-    private MainApp mainApp;
-    
+/******************************************
+ * Constructors
+ ******************************************/
     public EventViewController() {
     }
     
+    
+/******************************************
+ * initialize views and set data
+ ******************************************/
     @FXML
     private void initialize() {
+    	//setup event Table display
     	levelCol.setCellValueFactory(new PropertyValueFactory<LogEvent, String>("level"));
     	displayDateCol.setCellValueFactory(new PropertyValueFactory<LogEvent, String>("displayDate"));
     	sourceCol.setCellValueFactory(new PropertyValueFactory<LogEvent, String>("source"));
@@ -62,36 +70,53 @@ public class EventViewController {
     	descCol.setCellValueFactory(new PropertyValueFactory<LogEvent, String>("desc"));
     	fileNameCol.setCellValueFactory(new PropertyValueFactory<LogEvent, String>("fileName"));
     	
-    	logFileCol.setCellValueFactory(param -> new ReadOnlyStringWrapper(param.getValue()));
+    	//add double click listener for opening details
+        eventTable.setRowFactory( tv -> {
+            TableRow<LogEvent> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                	LogEvent rowData = row.getItem();
+                	mainApp.showEventDetails (rowData);
+                }
+            });
+            return row ;
+        });
+        
+    	//setup log file table display
+    	logFileCol.setCellValueFactory(new PropertyValueFactory<LogFile, String>("fileName"));
     	
+    	//setup search
     	searchOptionBox.getItems().addAll(
-    			"File",
-    			"Level",
-    			"Source",
-    			"Event ID",
-    			"Task Category",
-    			"Description"
+    			SearchOption.FILE.getValue(),
+    			SearchOption.LEVEL.getValue(),
+    			SearchOption.SOURCE.getValue(),
+    			SearchOption.EVENTID.getValue(),
+    			SearchOption.CATEGORY.getValue(),
+    			SearchOption.DESC.getValue()
     	);
-    	
-    	searchOptionBox.setValue("Description");
-    	
-    	
+    	searchOptionBox.setValue(SearchOption.DESC.getValue());
+
+    }
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
     }
     
+    //helper for setData
     private boolean stringCompareHelper (String filter, LogEvent logevent) {
         String option = searchOptionBox.getValue();
         
         String compare = "";
 
-        if (option.equals("File")) {
+        if (SearchOption.FILE.isEqualTo(option)) {
         	compare = logevent.getFileName();
-        } else if (option.equals("Level")) {
+        } else if (SearchOption.LEVEL.isEqualTo(option)) {
         	compare = logevent.getLevel();
-        } else if (option.equals("Source")) {
+        } else if (SearchOption.SOURCE.isEqualTo(option)) {
         	compare = logevent.getSource();
-        } else if (option.equals("Event ID")) {
+        } else if (SearchOption.EVENTID.isEqualTo(option)) {
         	compare = logevent.getId();
-        } else if (option.equals("Task Category")) {
+        } else if (SearchOption.CATEGORY.isEqualTo(option)) {
         	compare = logevent.getCategory();
         } else {
         	compare = logevent.getDesc();
@@ -103,19 +128,12 @@ public class EventViewController {
         
         return false; // Does not match.
     }
-    
-    public void searchOptionSelected() {
-    	//reset search
-    	filterField.setText("");
-    }
 
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
-        
-    	// 1. Wrap the ObservableList in a FilteredList (initially display all data).
+    public void setData () {
+    	//Wrap the ObservableList in a FilteredList (initially display all data).
         FilteredList<LogEvent> filteredData = new FilteredList<>(mainApp.getEventData(), p -> true);
         
-        // 2. Set the filter Predicate whenever the filter changes.
+        //Set the filter Predicate whenever the filter changes.
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(logevent -> {
                 // If filter text is empty, display all entries
@@ -130,44 +148,66 @@ public class EventViewController {
             });
         });
 
-        // 3. Wrap the FilteredList in a SortedList. 
+        // Filtered List cannot be modified, so wrap in SortedList to retain ObservableList sorting 
         SortedList<LogEvent> sortedData = new SortedList<>(filteredData);
 
-        // 4. Bind the SortedList comparator to the TableView comparator.
+        //Bind the SortedList comparator to the TableView comparator.
+        //Clicking header of original TableView will now also trigger sort of the SortedList
         sortedData.comparatorProperty().bind(eventTable.comparatorProperty());
 
-        // 5. Add sorted (and filtered) data to the table.
+        //Add data to the tables.
         eventTable.setItems(sortedData);
         logFileTable.setItems(mainApp.getOpenFiles());
         
-        eventTable.setRowFactory( tv -> {
-            TableRow<LogEvent> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-                	LogEvent rowData = row.getItem();
-                    System.out.println(rowData.getDesc());
-                }
-            });
-            return row ;
-        });
     }
-
+    
+    
+/******************************************
+ * functions linked to UI actions
+ ******************************************/    
     @FXML
     public void handleAdd() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Open File");
         
+        //only use CSV files
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Csv files (*.csv)", "*.csv");
         chooser.getExtensionFilters().add(extFilter);
+        //start in current directory
+        chooser.setInitialDirectory(new File("."));
         
         File file = chooser.showOpenDialog(new Stage());
+        
+    	//cancel button clicked
+    	if (file == null) {
+    		return;
+    	}
+    	
     	mainApp.loadEventsFile(file);
     }
     
     @FXML
     public void handleRemove() {
-    	String selectedItem = logFileTable.getSelectionModel().getSelectedItem();
-    	mainApp.handleRemove(selectedItem);
-        logFileTable.getItems().remove(selectedItem);
+    	LogFile selectedItem = logFileTable.getSelectionModel().getSelectedItem();
+    	
+    	//remove button clicked with no selection
+    	if (selectedItem == null) {
+        	Alert alert = new Alert(AlertType.INFORMATION);
+        	alert.setTitle("Error");
+        	alert.setHeaderText("Select a LogFile to remove");
+        	alert.show();
+    	} else {
+        	int idx = logFileTable.getSelectionModel().getSelectedIndex();
+        	System.out.println (idx);
+        	mainApp.handleRemove(selectedItem);
+            logFileTable.getItems().remove(selectedItem);
+    	}
+    }
+    
+    public void searchOptionSelected() {
+    	//change text to trigger re-evaluation of filtering of data
+    	String s = filterField.getText();
+    	filterField.setText("");
+    	filterField.setText(s);
     }
 }

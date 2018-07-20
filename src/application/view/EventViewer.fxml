@@ -27,8 +27,8 @@
                   </TableView>
                   <ButtonBar layoutX="5.0" layoutY="351.0" prefHeight="40.0" prefWidth="149.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
                     <buttons>
-                      <Button fx:id="addFileButton" mnemonicParsing="false" onAction="#handleAdd" text="Add..." />
-                        <Button fx:id="removeFileButton" mnemonicParsing="false" onAction="#handleRemove" text="Remove" />
+                      <Button mnemonicParsing="false" onAction="#handleAdd" text="Add..." />
+                        <Button mnemonicParsing="false" onAction="#handleRemove" text="Remove" />
                     </buttons>
                      <padding>
                         <Insets right="20.0" />

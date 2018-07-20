@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import application.model.LogEvent;
 import application.model.LogFile;
@@ -19,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert.AlertType;
 
@@ -29,12 +28,12 @@ public class MainApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
     
-    private ObservableList<LogEvent> events = FXCollections.observableArrayList();
-    private ObservableList<String> logFilesDisplay = FXCollections.observableArrayList();
-    
-    private HashMap<String, LogFile> logFiles = new HashMap<String, LogFile>();
+    private ObservableList<LogEvent> eventsDisplay = FXCollections.observableArrayList();
+    private ObservableList<LogFile> logFiles = FXCollections.observableArrayList();
 
-    
+/******************************************
+ * Initialize
+ ******************************************/   
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -45,12 +44,10 @@ public class MainApp extends Application {
         showEventViewer();
     }
 
-    /**
-     * Initializes the root layout.
-     */
+    //window border
     public void initRootLayout() {
         try {
-            // Load root layout from fxml file.
+            // Load root layout from FXML file.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
             rootLayout = (BorderPane) loader.load();
@@ -65,57 +62,104 @@ public class MainApp extends Application {
         
     }
 
-    /**
-     * Shows the person overview inside the root layout.
-     */
+    //content
     public void showEventViewer() {
         try {
-            // Load person overview.
+            // Load viewer layout from FXML file.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/EventViewer.fxml"));
             AnchorPane eventViewer = (AnchorPane) loader.load();
 
-            // Set person overview into the center of root layout.
+            // Add view into the center of root layout.
             rootLayout.setCenter(eventViewer);
             
+            //setup controller for the view
             EventViewController controller = loader.getController();
             controller.setMainApp(this);
+            controller.setData();
             
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    //getters
+    
+    //Details Pop-up
+    public void showEventDetails(LogEvent event) {
+        try {
+            // Load the FXML file and create a new stage for the pop-up
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/EventDetails.fxml"));
+            AnchorPane popup = (AnchorPane) loader.load();
+
+            // Create the dialog Stage.
+            Stage popupStage = new Stage();
+            popupStage.setTitle("Event Details");
+            popupStage.initModality(Modality.WINDOW_MODAL);
+            popupStage.initOwner(primaryStage);
+            Scene scene = new Scene(popup);
+            popupStage.setScene(scene);
+
+            // Set the person into the controller.
+            EventDetailsController controller = loader.getController();
+            controller.setPopupStage(popupStage);
+            controller.setEvent(event);
+
+            // Show the dialog and wait until the user closes it
+            popupStage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void main(String[] args) {
+        launch(args);
+    }
+    
+/******************************************
+ * Getters
+ ******************************************/    
     public Stage getPrimaryStage() {
         return primaryStage;
     }
     
     public ObservableList<LogEvent> getEventData() {
-        return events;
+        return eventsDisplay;
     }
     
     
-    public ObservableList<String> getOpenFiles() {
-        return logFilesDisplay;
+    public ObservableList<LogFile> getOpenFiles() {
+        return logFiles;
     }
     
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-    
-    //file helper
-    public void loadEventsFile(File file) {
-    	if (file == null) {
-    		return;
+/******************************************
+ * Modify Data
+ ******************************************/
+    //helper function
+    public int getLogIdx(String fileName) {
+    	int idx = -1;
+    	
+    	for (int i = 0; i < logFiles.size(); i++) {
+    		if (logFiles.get(i).getFileName().equals(fileName) ) {
+    			idx = i;
+    		}
     	}
-
-	    if (logFiles.get(file.getPath()) != null) {
+    	
+    	return idx;
+    }
+    
+    //load events from file
+    public void loadEventsFile(File file) {
+    	int idx = getLogIdx(file.getName());
+    	//if file is already open
+	    if (idx != -1 ) {
 		    Alert alert = new Alert(AlertType.INFORMATION);
 		    alert.setTitle("Error");
-		    alert.setHeaderText("File already loaded:\n" + file.getPath());
+		    alert.setHeaderText("File with same name already loaded:\n" + file.getName());
 		    alert.show();
+		//else open file
 	    } else {
 	
 	        try {
@@ -128,19 +172,21 @@ public class MainApp extends Application {
 	            String combined = "";
 	            LogEvent iter = new LogEvent();
 	          
-	            if (line != null) {  //skip first row header
+	            //skip first row header
+	            if (line != null) {  
 	            	line = reader.readLine();
 	            }
 	      
 	            while (line != null) {
 	            	String [] str = line.split(",");
 	    	
+	            	//handle multi-line items
 	            	if (str.length < 6) {
 	            		multiline = true;
 	            		combined = combined + "\n";
 	            		if (str.length > 0) {
 	            			combined = combined + str[0];
-	            		}
+	            		}	            		
 	            	} else {
 	            		if (multiline) {
 	            			multiline = false;
@@ -159,15 +205,13 @@ public class MainApp extends Application {
         			multiline = false;
         			iter.setDescription(combined);
 	            }
-	      
-	            LogFile log = new LogFile (file.getPath(), file.getName(), logEvents);
-	            logFiles.put(file.getPath(), log);
-	            logFilesDisplay.add (file.getPath());
-	            events.addAll(logEvents);
+
+	            logFiles.add(new LogFile (file.getPath(), file.getName(), logEvents));
+	            eventsDisplay.addAll(logEvents);
 	
 	            reader.close();
 	
-	        } catch (Exception e) { // catches ANY exception
+	        } catch (Exception e) {
 	        	Alert alert = new Alert(AlertType.INFORMATION);
 	        	alert.setTitle("Error");
 	        	alert.setHeaderText("Could not load data from file:\n" + file.getPath());
@@ -177,23 +221,25 @@ public class MainApp extends Application {
 	    }
     }
     
-    public void handleRemove(String item) {
-    	String filePath = item;
-    	
-    	LogFile log = logFiles.get(filePath);
-    	
-    	if (log != null) {
-        	//remove file
-        	events.clear();
-        	logFiles.remove(filePath);
-        	logFilesDisplay.remove(filePath);
-        	
-        	//refresh display
-        	for (Map.Entry<String,LogFile> entry : logFiles.entrySet()) {
-        		LogFile lf = entry.getValue();
-        		events.addAll(lf.getEvents());
+    public void handleRemove(LogFile log) {
+    	int idx = getLogIdx(log.getFileName());
+
+    	if (idx != -1) {
+        	//remove from end of array list
+        	LogFile swap = logFiles.get(logFiles.size() -1);
+        	logFiles.set(logFiles.size() -1, logFiles.get(idx));
+        	logFiles.set(idx, swap);
+        	logFiles.remove(logFiles.size() -1);
+
+        	//remove events associated with the log file, 
+        	//more efficient to re-build than to find and remove one event at a time
+        	//for (event : log.getEvents()) { events.remove(event) }
+        	eventsDisplay.clear();
+        	for (LogFile file : logFiles) {
+        		eventsDisplay.addAll(file.getEvents());
         	}
     	}
     	
     }
+
 }

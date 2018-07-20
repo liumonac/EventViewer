@@ -6,7 +6,6 @@ import application.util.CalendarUtil;
 
 public class LogEvent {
 	private String level;
-	private String displayDate;
 	private String source;
 	private String id;
 	private String category;
@@ -14,6 +13,9 @@ public class LogEvent {
 	private String fileName;
 	private Calendar date;
 	
+/******************************************
+ * Constructors
+ ******************************************/  
 	public LogEvent() {
 		
 	}
@@ -31,13 +33,12 @@ public class LogEvent {
 		this.desc = desc;
 		this.fileName = fileName;
 
-		if (CalendarUtil.validString (displayDate)) {
-			date = CalendarUtil.parse(displayDate);
-			this.displayDate = displayDate;
-		}
+		date = CalendarUtil.parse(displayDate);
 	}
 
-	//getters
+/******************************************
+ * Getters
+ ******************************************/  
 	public String getLevel () {
 		return level;
 	}
@@ -47,7 +48,7 @@ public class LogEvent {
 	}
 	
 	public String getDisplayDate () {
-		return displayDate;
+		return CalendarUtil.format(date);
 	}
 	
 	public String getSource () {
@@ -70,7 +71,9 @@ public class LogEvent {
 		return fileName;
 	}
 	
-	//setters
+/******************************************
+ * Setters
+ ******************************************/  
 	public void setDescription(String desc) {
 		this.desc = desc;
 	}

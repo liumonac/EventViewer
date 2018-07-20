@@ -8,6 +8,9 @@ public class LogFile {
 	
 	private ArrayList<LogEvent> eventElements = new  ArrayList<LogEvent>();
 	
+/******************************************
+ * Constructors
+ ******************************************/  
 	public LogFile() {
 		
 	}
@@ -23,7 +26,9 @@ public class LogFile {
 		this.eventElements = eventElements;
 	}
 	
-	
+/******************************************
+ * Getters
+ ******************************************/  
 	public String getFilePath() {
 		return filePath;
 	}
