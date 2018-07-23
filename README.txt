@@ -2,6 +2,9 @@
 README
 ********************************/
 
+Test Files in eventFiles folder
+______________________________________________________________________
+
 UI Controls:
 
 Left side: Log File controls

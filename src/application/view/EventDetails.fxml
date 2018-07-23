@@ -11,10 +11,10 @@
 
 <AnchorPane maxHeight="600.0" maxWidth="600.0" minHeight="600.0" minWidth="600.0" prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.EventDetailsController">
    <children>
-      <GridPane prefHeight="367.0" prefWidth="590.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+      <GridPane prefHeight="555.0" prefWidth="590.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
         <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="288.0" minWidth="10.0" prefWidth="86.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="508.0" minWidth="10.0" prefWidth="504.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="500.0" prefWidth="500.0" />
         </columnConstraints>
         <rowConstraints>
             <RowConstraints maxHeight="30.0" minHeight="30.0" percentHeight="5.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -71,18 +71,21 @@
                   <Insets right="5.0" />
                </padding>
             </Label>
-            <Label fx:id="filenameLabel" text="Label" wrapText="true" GridPane.columnIndex="1" />
-            <Label fx:id="levelLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="sourceLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label fx:id="idLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label fx:id="categoryLabel" text="Label" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Label fx:id="filenameLabel" text="filenameLabel" wrapText="true" GridPane.columnIndex="1" />
+            <Label fx:id="levelLabel" text="levelLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label fx:id="sourceLabel" text="sourceLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label fx:id="idLabel" text="idLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label fx:id="categoryLabel" text="categoryLabel" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             <Label text="Date and Time:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
                <padding>
                   <Insets right="5.0" />
                </padding>
             </Label>
-            <Label fx:id="dateLabel" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <TextArea fx:id="descText" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Label fx:id="dateLabel" text="dateLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextArea fx:id="descText" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="6">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin></TextArea>
          </children>
       </GridPane>
       <Button layoutX="517.0" layoutY="374.0" mnemonicParsing="false" onAction="#handleClose" text="Close" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" />
